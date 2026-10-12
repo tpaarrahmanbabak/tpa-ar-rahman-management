@@ -1,735 +1,539 @@
-const STORAGE_KEYS = {
-  profile: 'tpaArRahmanProfile',
-  users: 'tpaArRahmanUsers',
-  students: 'tpaArRahmanStudents',
-  attendance: 'tpaArRahmanAttendance',
-  organization: 'tpaArRahmanOrganization',
-  assessments: 'tpaArRahmanAssessments'
-};
-
-const defaultUsers = [
-  { id: 'admin', password: 'Kevinganteng313', role: 'Admin', name: 'Administrator' },
-  { id: 'wali_santri', password: 'walisantri123', role: 'Wali Santri', name: 'Wali Santri' }
-];
-
-const defaultProfile = {
-  name: 'TPA Ar-Rahman',
-  address: 'Jl. Pendidikan Islam No. 1, Kota Bandung',
-  founded: '2015-01-15',
-  history: 'TPA Ar-Rahman didirikan untuk menumbuhkan semangat menghafal, membaca Al-Qur\'an, dan membentuk karakter islami sejak dini.',
-  tagline: 'Tumbuhkan kecintaan pada Al-Qur\'an sejak dini.',
-  logo: createDefaultLogoDataUri()
-};
-
-const defaultOrganization = {
-  teachers: [
-    { name: 'Ustadzah Siti Aisyah', role: 'Koordinator Dasar' },
-    { name: 'Ustadz Rafi Hidayat', role: 'Guru Tahfidz' },
-    { name: 'Ustadzah Nabila', role: 'Guru Fiqih' }
-  ],
-  board: [
-    { name: 'Dewi Asih', role: 'Ketua Yayasan' },
-    { name: 'Arif Suhaemi', role: 'Sekretaris' },
-    { name: 'Maman Hamdani', role: 'Bendahara' }
-  ]
-};
-
-const defaultStudents = [
-  { id: 'S-001', name: 'Alya Rahma', parent: 'Ibu Siti', dob: '2014-05-01', gender: 'Perempuan', phone: '081234567890', className: 'Dasar A' },
-  { id: 'S-002', name: 'Farhan Rizki', parent: 'Bapak Arif', dob: '2013-11-10', gender: 'Laki-laki', phone: '081298765432', className: 'Menengah A' },
-  { id: 'S-003', name: 'Naila Putri', parent: 'Ibu Dina', dob: '2012-09-22', gender: 'Perempuan', phone: '081399988877', className: 'Lanjutan A' }
-];
-
-const defaultAttendance = [
-  { id: 'A-001', studentId: 'S-001', studentName: 'Alya Rahma', date: '2026-10-01', status: 'Hadir' },
-  { id: 'A-002', studentId: 'S-002', date: '2026-10-01', studentName: 'Farhan Rizki', status: 'Izin' },
-  { id: 'A-003', studentId: 'S-003', date: '2026-10-02', studentName: 'Naila Putri', status: 'Sakit' }
-];
-
-const defaultAssessments = [
-  { id: 'N-001', studentId: 'S-001', studentName: 'Alya Rahma', level: 'Dasar (Iqra\')', bacaan: 85, hafalan: 82, tauhid: 88, fiqih: 80 },
-  { id: 'N-002', studentId: 'S-002', studentName: 'Farhan Rizki', level: 'Menengah (Baca Al-Qur\'an)', bacaan: 78, hafalan: 87, tauhid: 80, fiqih: 82 },
-  { id: 'N-003', studentId: 'S-003', studentName: 'Naila Putri', level: 'Lanjutan (Tahfidz 30 Juz)', bacaan: 90, hafalan: 94, tauhid: 88, fiqih: 86 }
-];
-
-const state = {
-  user: null,
-  activeSection: 'dashboard'
-};
-
-function createDefaultLogoDataUri() {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-      <defs>
-        <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#0f766e"/>
-          <stop offset="100%" stop-color="#f4c86b"/>
-        </linearGradient>
-      </defs>
-      <rect width="120" height="120" rx="28" fill="#eafaf6"/>
-      <circle cx="60" cy="60" r="42" fill="url(#g1)" opacity="0.15"/>
-      <path d="M35 36c9-8 25-11 42-5 8 3 15 8 20 16-6-4-18-8-27-6-7 2-16 7-25 13-6 4-11 10-15 16 0-12 2-23 5-34z" fill="#0f766e"/>
-      <path d="M41 82c6-16 18-27 32-31 6 5 10 11 11 20-8-2-17 3-25 8-7 5-14 12-18 18 0-5 0-10 0-15z" fill="#f4c86b"/>
-      <path d="M58 40h18v44H58z" fill="#0f766e"/>
-      <path d="M50 59h36v8H50z" fill="#0f766e"/>
-    </svg>
-  `;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+* {
+  box-sizing: border-box;
 }
 
-function loadData(key, fallback) {
-  try {
-    const stored = localStorage.getItem(key);
-    if (!stored) return fallback;
-    return JSON.parse(stored);
-  } catch (error) {
-    return fallback;
-  }
+:root {
+  --bg: #f4f8f5;
+  --panel: #ffffff;
+  --panel-alt: #edf8f5;
+  --primary: #0f766e;
+  --primary-dark: #0a4b46;
+  --accent: #f4c86b;
+  --text: #1b2430;
+  --muted: #62717d;
+  --border: rgba(15, 118, 110, 0.14);
+  --success: #17966d;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --shadow: 0 18px 44px rgba(15, 118, 110, 0.12);
 }
 
-function saveData(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #edf7f2 0%, #f7f9f5 100%);
+  color: var(--text);
 }
 
-function bootstrap() {
-  if (!localStorage.getItem(STORAGE_KEYS.profile)) saveData(STORAGE_KEYS.profile, defaultProfile);
-  if (!localStorage.getItem(STORAGE_KEYS.users)) saveData(STORAGE_KEYS.users, defaultUsers);
-  if (!localStorage.getItem(STORAGE_KEYS.students)) saveData(STORAGE_KEYS.students, defaultStudents);
-  if (!localStorage.getItem(STORAGE_KEYS.attendance)) saveData(STORAGE_KEYS.attendance, defaultAttendance);
-  if (!localStorage.getItem(STORAGE_KEYS.organization)) saveData(STORAGE_KEYS.organization, defaultOrganization);
-  if (!localStorage.getItem(STORAGE_KEYS.assessments)) saveData(STORAGE_KEYS.assessments, defaultAssessments);
-
-  renderProfileOnLoginScreen();
-  bindUI();
-  renderAppIfLoggedIn();
-  renderCard();
+body {
+  min-height: 100vh;
 }
 
-function bindUI() {
-  document.getElementById('loginForm').addEventListener('submit', handleLogin);
-  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-  document.querySelectorAll('.nav-button').forEach((button) => {
-    button.addEventListener('click', () => {
-      const nextSection = button.dataset.section;
-      state.activeSection = nextSection;
-      switchSection(nextSection);
-    });
-  });
-
-  document.getElementById('profileForm').addEventListener('submit', saveProfileData);
-  document.getElementById('accountForm').addEventListener('submit', addAccount);
-  document.getElementById('studentForm').addEventListener('submit', addStudent);
-  document.getElementById('attendanceForm').addEventListener('submit', addAttendance);
-  document.getElementById('uktForm').addEventListener('submit', addAssessment);
-  document.getElementById('generateCardBtn').addEventListener('click', renderCard);
-  document.getElementById('downloadCardBtn').addEventListener('click', downloadCard);
-  document.getElementById('profileLogoInput').addEventListener('change', handleLogoUpload);
-  document.querySelectorAll('[data-export]').forEach((button) => {
-    button.addEventListener('click', () => exportToPdf(button.dataset.export));
-  });
-
-  document.getElementById('currentTitle').textContent = 'Dashboard';
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-function renderProfileOnLoginScreen() {
-  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
-  document.getElementById('loginLogo').src = profile.logo || defaultProfile.logo;
-  document.getElementById('loginBrandName').textContent = profile.name || 'TPA Ar-Rahman';
-  document.getElementById('loginTagline').textContent = profile.tagline || 'Tumbuhkan kecintaan pada Al-Qur\'an sejak dini.';
-
-  document.getElementById('sidebarLogo').src = profile.logo || defaultProfile.logo;
-  document.getElementById('sidebarTitle').textContent = profile.name || 'TPA Ar-Rahman';
-  document.getElementById('sidebarTagline').textContent = profile.tagline || 'Tagline';
+img {
+  display: block;
+  max-width: 100%;
 }
 
-function renderAppIfLoggedIn() {
-  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
-
-  if (!state.user) {
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('appScreen').classList.add('hidden');
-    return;
-  }
-
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('appScreen').classList.remove('hidden');
-  document.getElementById('userBadge').textContent = `Hai, ${state.user.name || state.user.id}`;
-
-  const allowed = state.user.role === 'Admin'
-    ? ['dashboard', 'profile', 'accounts', 'students', 'attendance', 'organization', 'card', 'ukt', 'pdf']
-    : ['dashboard', 'profile', 'students', 'attendance', 'organization', 'card', 'ukt', 'pdf'];
-
-  document.querySelectorAll('.nav-button').forEach((button) => {
-    const section = button.dataset.section;
-    const visible = allowed.includes(section);
-    button.classList.toggle('hidden', !visible);
-    if (visible && section === state.activeSection) button.classList.add('is-active');
-    else button.classList.remove('is-active');
-  });
-
-  switchSection(state.activeSection, false);
-  renderDashboard();
-  renderProfileForm();
-  renderAccountTable();
-  renderStudentTable();
-  renderAttendanceTable();
-  renderOrganizationLists();
-  renderUktTable();
-  renderReportPreview();
+.hidden {
+  display: none !important;
 }
 
-function switchSection(section, updateState = true) {
-  if (updateState) state.activeSection = section;
-
-  document.querySelectorAll('.page-section').forEach((node) => node.classList.add('hidden'));
-  const target = document.getElementById(`${section}Section`);
-  if (target) target.classList.remove('hidden');
-
-  document.getElementById('currentTitle').textContent = {
-    dashboard: 'Dashboard',
-    profile: 'Profil TPA',
-    accounts: 'Pengaturan Akun',
-    students: 'Pendaftaran Santri',
-    attendance: 'Absensi',
-    organization: 'Struktur Organisasi',
-    card: 'Kartu Ucapan',
-    ukt: 'Penilaian UKT',
-    pdf: 'Ekspor PDF'
-  }[section] || 'Dashboard';
-
-  document.querySelectorAll('.nav-button').forEach((button) => {
-    button.classList.toggle('is-active', button.dataset.section === section);
-  });
+.auth-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+  background:
+    radial-gradient(circle at top, rgba(244, 200, 107, 0.22), transparent 25%),
+    linear-gradient(135deg, #0d4d4a 0%, #163d5a 100%);
 }
 
-function handleLogin(event) {
-  event.preventDefault();
-  const id = document.getElementById('loginId').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const users = loadData(STORAGE_KEYS.users, defaultUsers);
-  const user = users.find((entry) => entry.id === id && entry.password === password);
-
-  if (!user) {
-    showToast('ID atau password tidak valid. Hubungi admin untuk mengajukan akses.');
-    return;
-  }
-
-  state.user = user;
-  renderAppIfLoggedIn();
+.login-shell {
+  width: min(100%, 520px);
 }
 
-function handleLogout() {
-  state.user = null;
-  state.activeSection = 'dashboard';
-  renderAppIfLoggedIn();
-  document.getElementById('loginForm').reset();
+.login-card {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 30px;
+  padding: 32px 28px;
+  box-shadow: 0 26px 70px rgba(10, 27, 30, 0.28);
 }
 
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.remove('hidden');
-  clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = setTimeout(() => {
-    toast.classList.add('hidden');
-  }, 2500);
+.brand-block {
+  margin-bottom: 22px;
 }
 
-function renderDashboard() {
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  const attendance = loadData(STORAGE_KEYS.attendance, defaultAttendance);
-  const assessments = loadData(STORAGE_KEYS.assessments, defaultAssessments);
-  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
-
-  const summaryCards = [
-    { label: 'Total Santri', value: students.length },
-    { label: 'Hadir Hari Ini', value: attendance.filter((item) => item.status === 'Hadir').length },
-    { label: 'Nilai Lulus', value: assessments.filter((item) => calculateAverage(item) >= 75).length },
-    { label: 'Tagline', value: profile.tagline.slice(0, 18) }
-  ];
-
-  const summaryGrid = document.getElementById('summaryGrid');
-  summaryGrid.innerHTML = summaryCards.map((item) => `
-    <div class="stat-card">
-      <span class="stat-label">${item.label}</span>
-      <div class="stat-value">${item.value}</div>
-    </div>
-  `).join('');
-
-  const quickActions = document.getElementById('quickActions');
-  const actions = [
-    'Pendaftaran',
-    'Absensi',
-    'UKT',
-    'PDF'
-  ];
-  quickActions.innerHTML = actions.map((action) => `
-    <button type="button" class="quick-action" data-go="${action.toLowerCase()}">${action}</button>
-  `).join('');
-
-  quickActions.querySelectorAll('[data-go]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const map = {
-        pendaftaran: 'students',
-        absensi: 'attendance',
-        ukt: 'ukt',
-        pdf: 'pdf'
-      };
-      switchSection(map[button.dataset.go]);
-    });
-  });
-
-  const profileSummaryBox = document.getElementById('profileSummaryBox');
-  profileSummaryBox.innerHTML = `
-    <div class="summary-point"><strong>Nama TPA:</strong> ${profile.name}</div>
-    <div class="summary-point"><strong>Alamat:</strong> ${profile.address}</div>
-    <div class="summary-point"><strong>Tanggal Berdiri:</strong> ${formatDate(profile.founded)}</div>
-    <div class="summary-point"><strong>Sejarah:</strong> ${profile.history}</div>
-  `;
+.brand-logo,
+.mini-logo,
+.logo-preview {
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
 }
 
-function renderProfileForm() {
-  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
-  document.getElementById('profileName').value = profile.name;
-  document.getElementById('profileAddress').value = profile.address;
-  document.getElementById('profileFounded').value = profile.founded;
-  document.getElementById('profileTagline').value = profile.tagline;
-  document.getElementById('profileHistory').value = profile.history;
-  document.getElementById('profileLogoPreview').src = profile.logo || defaultProfile.logo;
+.brand-logo {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 14px;
 }
 
-function saveProfileData(event) {
-  event.preventDefault();
-  const profile = {
-    name: document.getElementById('profileName').value.trim(),
-    address: document.getElementById('profileAddress').value.trim(),
-    founded: document.getElementById('profileFounded').value,
-    tagline: document.getElementById('profileTagline').value.trim(),
-    history: document.getElementById('profileHistory').value.trim(),
-    logo: document.getElementById('profileLogoPreview').src || defaultProfile.logo
-  };
-
-  saveData(STORAGE_KEYS.profile, profile);
-  renderProfileOnLoginScreen();
-  renderDashboard();
-  showToast('Profil TPA berhasil diperbarui.');
+.brand-name,
+.sidebar-title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--primary-dark);
 }
 
-function handleLogoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const preview = document.getElementById('profileLogoPreview');
-    preview.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+.brand-name {
+  font-size: 2.2rem;
+  font-family: 'Playfair Display', serif;
 }
 
-function renderAccountTable() {
-  const users = loadData(STORAGE_KEYS.users, defaultUsers);
-  const tbody = document.getElementById('accountTableBody');
-
-  tbody.innerHTML = users.map((user) => `
-    <tr>
-      <td>${user.id}</td>
-      <td>${user.name}</td>
-      <td>${user.role}</td>
-      <td>
-        ${user.id === 'admin' || user.id === 'wali_santri' ? '<span class="badge pass">Default</span>' : `<button type="button" class="secondary-button" data-remove-user="${user.id}">Hapus</button>`}
-      </td>
-    </tr>
-  `).join('');
-
-  tbody.querySelectorAll('[data-remove-user]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const id = button.dataset.removeUser;
-      const usersCopy = loadData(STORAGE_KEYS.users, defaultUsers).filter((entry) => entry.id !== id);
-      saveData(STORAGE_KEYS.users, usersCopy);
-      renderAccountTable();
-      showToast('Akun berhasil dihapus.');
-    });
-  });
+.brand-tagline,
+#sidebarTagline {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: 8px;
 }
 
-function addAccount(event) {
-  event.preventDefault();
-  const username = document.getElementById('accountUsername').value.trim();
-  const password = document.getElementById('accountPassword').value.trim();
-  const name = document.getElementById('accountName').value.trim();
-  const role = document.getElementById('accountRole').value;
-
-  if (!username || !password || !name) {
-    showToast('Semua field akun harus diisi.');
-    return;
-  }
-
-  const users = loadData(STORAGE_KEYS.users, defaultUsers);
-  if (users.some((entry) => entry.id === username)) {
-    showToast('Username sudah digunakan.');
-    return;
-  }
-
-  users.push({ id: username, password, role, name });
-  saveData(STORAGE_KEYS.users, users);
-  document.getElementById('accountForm').reset();
-  renderAccountTable();
-  showToast('Akun baru berhasil ditambahkan.');
+.login-note {
+  margin: 0 0 20px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
 }
 
-function renderStudentTable() {
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  const tbody = document.getElementById('studentTableBody');
-  tbody.innerHTML = students.map((student) => `
-    <tr>
-      <td>${student.name}</td>
-      <td>${student.parent}</td>
-      <td>${student.dob}</td>
-      <td>${student.gender}</td>
-      <td>${student.phone}</td>
-      <td>${student.className}</td>
-      <td><button data-delete-student="${student.id}" class="secondary-button">Hapus</button></td>
-    </tr>
-  `).join('');
-
-  tbody.querySelectorAll('[data-delete-student]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const id = button.dataset.deleteStudent;
-      const filtered = loadData(STORAGE_KEYS.students, defaultStudents).filter((student) => student.id !== id);
-      saveData(STORAGE_KEYS.students, filtered);
-      renderStudentTable();
-      renderAttendanceTable();
-      renderUktTable();
-      renderReportPreview();
-      showToast('Data santri berhasil dihapus.');
-    });
-  });
-
-  const attendanceStudent = document.getElementById('attendanceStudent');
-  const uktStudent = document.getElementById('uktStudent');
-  const studentOptions = students.map((student) => `<option value="${student.id}">${student.name}</option>`).join('');
-  attendanceStudent.innerHTML = studentOptions;
-  uktStudent.innerHTML = studentOptions;
+.stacked-form,
+.form-grid {
+  display: grid;
+  gap: 16px;
 }
 
-function addStudent(event) {
-  event.preventDefault();
-  const student = {
-    id: `S-${String(Date.now()).slice(-5)}`,
-    name: document.getElementById('studentName').value.trim(),
-    parent: document.getElementById('studentParent').value.trim(),
-    dob: document.getElementById('studentDob').value,
-    gender: document.getElementById('studentGender').value,
-    phone: document.getElementById('studentPhone').value.trim(),
-    className: document.getElementById('studentClass').value.trim()
-  };
-
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  students.push(student);
-  saveData(STORAGE_KEYS.students, students);
-  document.getElementById('studentForm').reset();
-  renderStudentTable();
-  renderDashboard();
-  renderReportPreview();
-  showToast('Data santri berhasil ditambah.');
+label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
 }
 
-function renderAttendanceTable() {
-  const attendance = loadData(STORAGE_KEYS.attendance, defaultAttendance);
-  const tbody = document.getElementById('attendanceTableBody');
-  tbody.innerHTML = attendance.map((item) => `
-    <tr>
-      <td>${item.studentName}</td>
-      <td>${item.date}</td>
-      <td>${item.status}</td>
-      <td><button data-delete-attendance="${item.id}" class="secondary-button">Hapus</button></td>
-    </tr>
-  `).join('');
-
-  tbody.querySelectorAll('[data-delete-attendance]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const id = button.dataset.deleteAttendance;
-      const filtered = loadData(STORAGE_KEYS.attendance, defaultAttendance).filter((entry) => entry.id !== id);
-      saveData(STORAGE_KEYS.attendance, filtered);
-      renderAttendanceTable();
-      renderDashboard();
-      showToast('Absensi berhasil dihapus.');
-    });
-  });
-
-  const attendanceDate = document.getElementById('attendanceDate');
-  if (!attendanceDate.value) attendanceDate.value = new Date().toISOString().slice(0, 10);
+label span {
+  font-size: 0.92rem;
 }
 
-function addAttendance(event) {
-  event.preventDefault();
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  const studentId = document.getElementById('attendanceStudent').value;
-  const student = students.find((entry) => entry.id === studentId);
-  const date = document.getElementById('attendanceDate').value;
-  const status = document.getElementById('attendanceStatus').value;
-
-  if (!student || !date) {
-    showToast('Pilih santri dan tanggal absensi.');
-    return;
-  }
-
-  const records = loadData(STORAGE_KEYS.attendance, defaultAttendance);
-  records.push({
-    id: `A-${String(Date.now()).slice(-5)}`,
-    studentId: student.id,
-    studentName: student.name,
-    date,
-    status
-  });
-
-  saveData(STORAGE_KEYS.attendance, records);
-  event.target.reset();
-  document.getElementById('attendanceDate').value = new Date().toISOString().slice(0, 10);
-  renderAttendanceTable();
-  renderDashboard();
-  showToast('Absensi berhasil disimpan.');
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-function renderOrganizationLists() {
-  const organization = loadData(STORAGE_KEYS.organization, defaultOrganization);
-  document.getElementById('teacherList').innerHTML = organization.teachers.map((person) => `
-    <div class="list-item">
-      <strong>${person.name}</strong>
-      <span>${person.role}</span>
-    </div>
-  `).join('');
-
-  document.getElementById('boardList').innerHTML = organization.board.map((person) => `
-    <div class="list-item">
-      <strong>${person.name}</strong>
-      <span>${person.role}</span>
-    </div>
-  `).join('');
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(15, 118, 110, 0.6);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.08);
 }
 
-function renderCard() {
-  const canvas = document.getElementById('cardCanvas');
-  const ctx = canvas.getContext('2d');
-  const name = document.getElementById('cardName').value || 'Santri TPA';
-  const title = document.getElementById('cardTitle').value || 'Selamat Belajar';
-  const message = document.getElementById('cardMessage').value || 'Semoga ilmu bermanfaat.';
-  const color = document.getElementById('cardColor').value || '#0f766e';
-
-  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, '#f6f9f2');
-  gradient.addColorStop(0.6, '#fffaf2');
-  gradient.addColorStop(1, '#eefaf4');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, canvas.width, 140);
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '700 28px Inter';
-  ctx.fillText('TPA Ar-Rahman', 48, 70);
-
-  ctx.fillStyle = '#1f2937';
-  ctx.font = '700 42px Inter';
-  ctx.fillText(title, 48, 220);
-
-  ctx.font = '500 28px Inter';
-  wrapText(ctx, `Kepada: ${name}`, 48, 270, 620, 36);
-
-  ctx.font = '500 22px Inter';
-  wrapText(ctx, message, 48, 330, 620, 32);
-
-  const logo = new Image();
-  logo.src = loadData(STORAGE_KEYS.profile, defaultProfile).logo || defaultProfile.logo;
-  logo.onload = () => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(canvas.width - 130, 110, 52, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(logo, canvas.width - 182, 58, 104, 104);
-    ctx.restore();
-  };
+textarea {
+  min-height: 110px;
+  resize: vertical;
 }
 
-function wrapText(context, text, x, y, maxWidth, lineHeight) {
-  const words = text.split(' ');
-  let line = '';
-  let currentY = y;
-
-  for (let i = 0; i < words.length; i += 1) {
-    const testLine = `${line}${words[i]} `;
-    const metrics = context.measureText(testLine);
-    if (metrics.width > maxWidth && i > 0) {
-      context.fillText(line, x, currentY);
-      line = `${words[i]} `;
-      currentY += lineHeight;
-    } else {
-      line = testLine;
-    }
-  }
-  context.fillText(line, x, currentY);
+button {
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  transition: transform 0.15s ease, opacity 0.2s ease;
 }
 
-function downloadCard() {
-  const canvas = document.getElementById('cardCanvas');
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'kartu-ucapan-tpa-ar-rahman.png';
-  link.click();
+button:hover {
+  transform: translateY(-1px);
 }
 
-function renderUktTable() {
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  const assessments = loadData(STORAGE_KEYS.assessments, defaultAssessments);
-  const tbody = document.getElementById('uktTableBody');
-
-  const rows = assessments.map((entry) => {
-    const avg = calculateAverage(entry);
-    const status = avg >= 75 ? 'Lulus' : 'Remedial';
-    return `
-      <tr>
-        <td>${entry.studentName}</td>
-        <td>${entry.level}</td>
-        <td>${entry.bacaan}</td>
-        <td>${entry.hafalan}</td>
-        <td>${entry.tauhid}</td>
-        <td>${entry.fiqih}</td>
-        <td>${avg.toFixed(1)}</td>
-        <td><span class="badge ${status === 'Lulus' ? 'pass' : 'fail'}">${status}</span></td>
-      </tr>
-    `;
-  });
-
-  tbody.innerHTML = rows.join('') || '<tr><td colspan="8">Belum ada data nilai.</td></tr>';
-
-  const studentSelect = document.getElementById('uktStudent');
-  const options = students.map((student) => `<option value="${student.id}">${student.name}</option>`).join('');
-  studentSelect.innerHTML = options;
+.primary-button {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 12px 18px;
+  font-weight: 700;
 }
 
-function addAssessment(event) {
-  event.preventDefault();
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  const studentId = document.getElementById('uktStudent').value;
-  const student = students.find((entry) => entry.id === studentId);
-  const assessment = {
-    id: `N-${String(Date.now()).slice(-5)}`,
-    studentId: student.id,
-    studentName: student.name,
-    level: document.getElementById('uktLevel').value,
-    bacaan: Number(document.getElementById('uktBacaan').value),
-    hafalan: Number(document.getElementById('uktHafalan').value),
-    tauhid: Number(document.getElementById('uktTauhid').value),
-    fiqih: Number(document.getElementById('uktFiqih').value)
-  };
-
-  const data = loadData(STORAGE_KEYS.assessments, defaultAssessments);
-  const existingIndex = data.findIndex((entry) => entry.studentId === student.id);
-  if (existingIndex >= 0) data[existingIndex] = assessment;
-  else data.push(assessment);
-
-  saveData(STORAGE_KEYS.assessments, data);
-  renderUktTable();
-  renderReportPreview();
-  showToast('Nilai UKT berhasil disimpan.');
+.secondary-button {
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--primary-dark);
+  padding: 12px 18px;
+  font-weight: 700;
 }
 
-function calculateAverage(entry) {
-  const values = [entry.bacaan, entry.hafalan, entry.tauhid, entry.fiqih];
-  const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
-  return total / values.length;
+.full {
+  width: 100%;
 }
 
-function formatDate(dateString) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return dateString;
-  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+.app-shell {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  min-height: 100vh;
 }
 
-function renderReportPreview() {
-  const students = loadData(STORAGE_KEYS.students, defaultStudents);
-  const assessments = loadData(STORAGE_KEYS.assessments, defaultAssessments);
-  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
-  const preview = document.getElementById('reportPreview');
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 24px 18px;
+  background: linear-gradient(180deg, #0d4d4a 0%, #0a3645 100%);
+  color: white;
+}
 
-  if (!students.length) {
-    preview.innerHTML = '<div class="report-card">Belum ada data santri.</div>';
-    return;
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px;
+}
+
+.mini-logo {
+  width: 54px;
+  height: 54px;
+}
+
+.sidebar-title {
+  color: white;
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.nav-menu {
+  display: grid;
+  gap: 10px;
+}
+
+.nav-button {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 12px 14px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.nav-button.is-active {
+  background: rgba(244, 200, 107, 0.14);
+  border: 1px solid rgba(244, 200, 107, 0.4);
+}
+
+.main-panel {
+  padding: 28px;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+
+.page-section {
+  display: grid;
+  gap: 20px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.stat-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+
+.cards-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.dashboard-grid {
+  grid-template-columns: 1.2fr 1fr;
+}
+
+.two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pdf-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.quick-action {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  min-height: 84px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.summary-box {
+  display: grid;
+  gap: 10px;
+}
+
+.summary-point {
+  background: var(--panel-alt);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.compact-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.full-span {
+  grid-column: 1 / -1;
+}
+
+.logo-preview-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.logo-preview {
+  width: 150px;
+  height: 150px;
+  background: #f0f6f4;
+  border: 1px solid var(--border);
+}
+
+.table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(15, 118, 110, 0.08);
+  vertical-align: top;
+}
+
+th {
+  background: rgba(15, 118, 110, 0.03);
+  color: var(--primary-dark);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.list-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.list-item {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.list-item strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.card-generator-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.2fr);
+  align-items: center;
+}
+
+.card-preview-box {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.05), rgba(244, 200, 107, 0.08));
+}
+
+#cardCanvas {
+  width: 100%;
+  max-width: 670px;
+  height: auto;
+  background: white;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.pdf-item {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.report-preview {
+  min-height: 220px;
+  background: rgba(15, 118, 110, 0.02);
+  border: 1px dashed rgba(15, 118, 110, 0.3);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.report-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge.pass {
+  background: rgba(23, 150, 109, 0.12);
+  color: var(--success);
+}
+
+.badge.fail {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+}
+
+.user-badge {
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--primary-dark);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  background: var(--primary-dark);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
   }
 
-  const report = students.map((student) => {
-    const grade = assessments.find((entry) => entry.studentId === student.id);
-    const average = grade ? calculateAverage(grade) : 0;
-    const status = average >= 75 ? 'Lulus' : 'Belum Lulus';
+  .main-panel {
+    padding: 18px;
+  }
 
-    return `
-      <div class="report-card" style="margin-bottom: 14px;">
-        <h3>${profile.name}</h3>
-        <p><strong>Nama:</strong> ${student.name}</p>
-        <p><strong>Kelas:</strong> ${student.className}</p>
-        <p><strong>Nilai Rata-rata:</strong> ${average.toFixed(1)}</p>
-        <p><strong>Status:</strong> ${status}</p>
-      </div>
-    `;
-  }).join('');
+  .dashboard-grid,
+  .two-columns,
+  .pdf-grid,
+  .card-generator-layout,
+  .form-grid,
+  .compact-form {
+    grid-template-columns: 1fr;
+  }
 
-  preview.innerHTML = report;
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
-
-async function exportToPdf(type) {
-  if (!window.jspdf || !window.html2canvas) {
-    showToast('Ekspor PDF gagal. Coba refresh kembali.');
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-
-  if (type === 'studentsPdf') {
-    const element = document.getElementById('studentTableBody');
-    const canvas = await html2canvas(element.closest('table'));
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-    pdf.save('data-santri.pdf');
-  }
-
-  if (type === 'attendancePdf') {
-    const element = document.getElementById('attendanceTableBody').closest('table');
-    const canvas = await html2canvas(element);
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-    pdf.save('absensi-santri.pdf');
-  }
-
-  if (type === 'uktPdf') {
-    const table = document.querySelector('#uktTableBody').closest('table');
-    const canvas = await html2canvas(table);
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-    pdf.save('leger-nilai-ukt.pdf');
-  }
-
-  if (type === 'reportPdf') {
-    const element = document.getElementById('reportPreview');
-    const canvas = await html2canvas(element);
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-    pdf.save('rapor-santri.pdf');
-  }
-
-  showToast('PDF berhasil dibuat.');
-}
-
-bootstrap();

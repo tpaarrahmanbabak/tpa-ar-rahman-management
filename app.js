@@ -1,1017 +1,735 @@
-const STORAGE_KEY = 'tpa-ar-rahman-state-v1';
-
-const defaultState = {
-  auth: {
-    loggedIn: false,
-    role: null,
-    username: null
-  },
-  currentPage: 'dashboard',
-  profile: {
-    nama: 'TPA Ar-Rahman',
-    alamat: 'Jl. Melati No. 24, Kelurahan Asemjajar, Kota Bandung',
-    tanggalBerdiri: '2014-01-15',
-    sejarah: 'TPA Ar-Rahman berdiri untuk menyiapkan generasi muda yang kuat dalam akidah, hafalan Al-Qur\'an, dan akhlak mulia.',
-    tagline: 'Membentuk Generasi Qurani yang Berakhlak Mulia',
-    logo: ''
-  },
-  santri: [
-    {
-      id: 1,
-      nama: 'Ahmad Farhan',
-      nis: '2024-001',
-      ttl: '2014-03-10',
-      alamat: 'Jl. Kenanga 12',
-      wali: 'Bapak Sulaiman',
-      tingkatan: 'Dasar (Iqra\')',
-      status: 'Aktif'
-    },
-    {
-      id: 2,
-      nama: 'Nur Aisyah',
-      nis: '2024-002',
-      ttl: '2013-11-08',
-      alamat: 'Jl. Mawar 27',
-      wali: 'Ibu Rahma',
-      tingkatan: 'Menengah (Baca Al-Qur\'an)',
-      status: 'Aktif'
-    },
-    {
-      id: 3,
-      nama: 'M. Zaid',
-      nis: '2024-003',
-      ttl: '2012-06-12',
-      alamat: 'Jl. Cendana 45',
-      wali: 'Bapak Irfan',
-      tingkatan: 'Lanjutan (Tahfidz 30 Juz)',
-      status: 'Aktif'
-    }
-  ],
-  organisasi: [
-    {
-      id: 1,
-      role: 'Pengajar Tahfidz',
-      nama: 'Ustadz H. Taufik',
-      foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 2,
-      role: 'Pengajar Tilawah',
-      nama: 'Ustadzah Siti Aisyah',
-      foto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 3,
-      role: 'Ketua Pengurus',
-      nama: 'Bapak Rizki',
-      foto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80'
-    }
-  ],
-  attendance: [
-    { nama: 'Ahmad Farhan', tanggal: '2026-10-09', status: 'Hadir' },
-    { nama: 'Nur Aisyah', tanggal: '2026-10-09', status: 'Hadir' },
-    { nama: 'M. Zaid', tanggal: '2026-10-09', status: 'Izin' },
-    { nama: 'Ahmad Farhan', tanggal: '2026-10-10', status: 'Hadir' },
-    { nama: 'Nur Aisyah', tanggal: '2026-10-10', status: 'Alpha' },
-    { nama: 'M. Zaid', tanggal: '2026-10-10', status: 'Hadir' }
-  ],
-  ukt: [
-    {
-      id: 1,
-      nama: 'Ahmad Farhan',
-      level: 'Dasar (Iqra\')',
-      bacaan: 82,
-      hafalan: 78,
-      tauhid: 80,
-      fiqih: 76
-    },
-    {
-      id: 2,
-      nama: 'Nur Aisyah',
-      level: 'Menengah (Baca Al-Qur\'an)',
-      bacaan: 88,
-      hafalan: 84,
-      tauhid: 79,
-      fiqih: 81
-    },
-    {
-      id: 3,
-      nama: 'M. Zaid',
-      level: 'Lanjutan (Tahfidz 30 Juz)',
-      bacaan: 90,
-      hafalan: 94,
-      tauhid: 86,
-      fiqih: 88
-    }
-  ],
-  account: {
-    adminName: 'Admin TPA',
-    adminEmail: 'admin@tpa-arrahman.sch.id'
-  }
+const STORAGE_KEYS = {
+  profile: 'tpaArRahmanProfile',
+  users: 'tpaArRahmanUsers',
+  students: 'tpaArRahmanStudents',
+  attendance: 'tpaArRahmanAttendance',
+  organization: 'tpaArRahmanOrganization',
+  assessments: 'tpaArRahmanAssessments'
 };
 
-const app = document.getElementById('app');
-let state = loadState();
+const defaultUsers = [
+  { id: 'admin', password: 'Kevinganteng313', role: 'Admin', name: 'Administrator' },
+  { id: 'wali_santri', password: 'walisantri123', role: 'Wali Santri', name: 'Wali Santri' }
+];
 
-function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved ? { ...defaultState, ...JSON.parse(saved) } : JSON.parse(JSON.stringify(defaultState));
+const defaultProfile = {
+  name: 'TPA Ar-Rahman',
+  address: 'Jl. Pendidikan Islam No. 1, Kota Bandung',
+  founded: '2015-01-15',
+  history: 'TPA Ar-Rahman didirikan untuk menumbuhkan semangat menghafal, membaca Al-Qur\'an, dan membentuk karakter islami sejak dini.',
+  tagline: 'Tumbuhkan kecintaan pada Al-Qur\'an sejak dini.',
+  logo: createDefaultLogoDataUri()
+};
+
+const defaultOrganization = {
+  teachers: [
+    { name: 'Ustadzah Siti Aisyah', role: 'Koordinator Dasar' },
+    { name: 'Ustadz Rafi Hidayat', role: 'Guru Tahfidz' },
+    { name: 'Ustadzah Nabila', role: 'Guru Fiqih' }
+  ],
+  board: [
+    { name: 'Dewi Asih', role: 'Ketua Yayasan' },
+    { name: 'Arif Suhaemi', role: 'Sekretaris' },
+    { name: 'Maman Hamdani', role: 'Bendahara' }
+  ]
+};
+
+const defaultStudents = [
+  { id: 'S-001', name: 'Alya Rahma', parent: 'Ibu Siti', dob: '2014-05-01', gender: 'Perempuan', phone: '081234567890', className: 'Dasar A' },
+  { id: 'S-002', name: 'Farhan Rizki', parent: 'Bapak Arif', dob: '2013-11-10', gender: 'Laki-laki', phone: '081298765432', className: 'Menengah A' },
+  { id: 'S-003', name: 'Naila Putri', parent: 'Ibu Dina', dob: '2012-09-22', gender: 'Perempuan', phone: '081399988877', className: 'Lanjutan A' }
+];
+
+const defaultAttendance = [
+  { id: 'A-001', studentId: 'S-001', studentName: 'Alya Rahma', date: '2026-10-01', status: 'Hadir' },
+  { id: 'A-002', studentId: 'S-002', date: '2026-10-01', studentName: 'Farhan Rizki', status: 'Izin' },
+  { id: 'A-003', studentId: 'S-003', date: '2026-10-02', studentName: 'Naila Putri', status: 'Sakit' }
+];
+
+const defaultAssessments = [
+  { id: 'N-001', studentId: 'S-001', studentName: 'Alya Rahma', level: 'Dasar (Iqra\')', bacaan: 85, hafalan: 82, tauhid: 88, fiqih: 80 },
+  { id: 'N-002', studentId: 'S-002', studentName: 'Farhan Rizki', level: 'Menengah (Baca Al-Qur\'an)', bacaan: 78, hafalan: 87, tauhid: 80, fiqih: 82 },
+  { id: 'N-003', studentId: 'S-003', studentName: 'Naila Putri', level: 'Lanjutan (Tahfidz 30 Juz)', bacaan: 90, hafalan: 94, tauhid: 88, fiqih: 86 }
+];
+
+const state = {
+  user: null,
+  activeSection: 'dashboard'
+};
+
+function createDefaultLogoDataUri() {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#0f766e"/>
+          <stop offset="100%" stop-color="#f4c86b"/>
+        </linearGradient>
+      </defs>
+      <rect width="120" height="120" rx="28" fill="#eafaf6"/>
+      <circle cx="60" cy="60" r="42" fill="url(#g1)" opacity="0.15"/>
+      <path d="M35 36c9-8 25-11 42-5 8 3 15 8 20 16-6-4-18-8-27-6-7 2-16 7-25 13-6 4-11 10-15 16 0-12 2-23 5-34z" fill="#0f766e"/>
+      <path d="M41 82c6-16 18-27 32-31 6 5 10 11 11 20-8-2-17 3-25 8-7 5-14 12-18 18 0-5 0-10 0-15z" fill="#f4c86b"/>
+      <path d="M58 40h18v44H58z" fill="#0f766e"/>
+      <path d="M50 59h36v8H50z" fill="#0f766e"/>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function loadData(key, fallback) {
+  try {
+    const stored = localStorage.getItem(key);
+    if (!stored) return fallback;
+    return JSON.parse(stored);
+  } catch (error) {
+    return fallback;
+  }
 }
 
-function setPage(page) {
-  state.currentPage = page;
-  saveState();
-  render();
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
-function login(username, password) {
-  const normalizedUser = String(username).trim().toLowerCase();
-  const normalizedPass = String(password).trim();
+function bootstrap() {
+  if (!localStorage.getItem(STORAGE_KEYS.profile)) saveData(STORAGE_KEYS.profile, defaultProfile);
+  if (!localStorage.getItem(STORAGE_KEYS.users)) saveData(STORAGE_KEYS.users, defaultUsers);
+  if (!localStorage.getItem(STORAGE_KEYS.students)) saveData(STORAGE_KEYS.students, defaultStudents);
+  if (!localStorage.getItem(STORAGE_KEYS.attendance)) saveData(STORAGE_KEYS.attendance, defaultAttendance);
+  if (!localStorage.getItem(STORAGE_KEYS.organization)) saveData(STORAGE_KEYS.organization, defaultOrganization);
+  if (!localStorage.getItem(STORAGE_KEYS.assessments)) saveData(STORAGE_KEYS.assessments, defaultAssessments);
 
-  if (normalizedUser === 'admin' && normalizedPass === 'Kevinganteng313') {
-    state.auth = { loggedIn: true, role: 'admin', username: 'admin' };
-    saveState();
-    render();
+  renderProfileOnLoginScreen();
+  bindUI();
+  renderAppIfLoggedIn();
+  renderCard();
+}
+
+function bindUI() {
+  document.getElementById('loginForm').addEventListener('submit', handleLogin);
+  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+  document.querySelectorAll('.nav-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const nextSection = button.dataset.section;
+      state.activeSection = nextSection;
+      switchSection(nextSection);
+    });
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', saveProfileData);
+  document.getElementById('accountForm').addEventListener('submit', addAccount);
+  document.getElementById('studentForm').addEventListener('submit', addStudent);
+  document.getElementById('attendanceForm').addEventListener('submit', addAttendance);
+  document.getElementById('uktForm').addEventListener('submit', addAssessment);
+  document.getElementById('generateCardBtn').addEventListener('click', renderCard);
+  document.getElementById('downloadCardBtn').addEventListener('click', downloadCard);
+  document.getElementById('profileLogoInput').addEventListener('change', handleLogoUpload);
+  document.querySelectorAll('[data-export]').forEach((button) => {
+    button.addEventListener('click', () => exportToPdf(button.dataset.export));
+  });
+
+  document.getElementById('currentTitle').textContent = 'Dashboard';
+}
+
+function renderProfileOnLoginScreen() {
+  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
+  document.getElementById('loginLogo').src = profile.logo || defaultProfile.logo;
+  document.getElementById('loginBrandName').textContent = profile.name || 'TPA Ar-Rahman';
+  document.getElementById('loginTagline').textContent = profile.tagline || 'Tumbuhkan kecintaan pada Al-Qur\'an sejak dini.';
+
+  document.getElementById('sidebarLogo').src = profile.logo || defaultProfile.logo;
+  document.getElementById('sidebarTitle').textContent = profile.name || 'TPA Ar-Rahman';
+  document.getElementById('sidebarTagline').textContent = profile.tagline || 'Tagline';
+}
+
+function renderAppIfLoggedIn() {
+  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
+
+  if (!state.user) {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('appScreen').classList.add('hidden');
     return;
   }
 
-  if (normalizedUser === 'wali santri' && normalizedPass === 'walisantri123') {
-    state.auth = { loggedIn: true, role: 'wali', username: 'wali santri' };
-    saveState();
-    render();
-    return;
-  }
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  document.getElementById('userBadge').textContent = `Hai, ${state.user.name || state.user.id}`;
 
-  throw new Error('ID atau password tidak valid.');
+  const allowed = state.user.role === 'Admin'
+    ? ['dashboard', 'profile', 'accounts', 'students', 'attendance', 'organization', 'card', 'ukt', 'pdf']
+    : ['dashboard', 'profile', 'students', 'attendance', 'organization', 'card', 'ukt', 'pdf'];
+
+  document.querySelectorAll('.nav-button').forEach((button) => {
+    const section = button.dataset.section;
+    const visible = allowed.includes(section);
+    button.classList.toggle('hidden', !visible);
+    if (visible && section === state.activeSection) button.classList.add('is-active');
+    else button.classList.remove('is-active');
+  });
+
+  switchSection(state.activeSection, false);
+  renderDashboard();
+  renderProfileForm();
+  renderAccountTable();
+  renderStudentTable();
+  renderAttendanceTable();
+  renderOrganizationLists();
+  renderUktTable();
+  renderReportPreview();
 }
 
-function logout() {
-  state.auth = { loggedIn: false, role: null, username: null };
-  saveState();
-  render();
+function switchSection(section, updateState = true) {
+  if (updateState) state.activeSection = section;
+
+  document.querySelectorAll('.page-section').forEach((node) => node.classList.add('hidden'));
+  const target = document.getElementById(`${section}Section`);
+  if (target) target.classList.remove('hidden');
+
+  document.getElementById('currentTitle').textContent = {
+    dashboard: 'Dashboard',
+    profile: 'Profil TPA',
+    accounts: 'Pengaturan Akun',
+    students: 'Pendaftaran Santri',
+    attendance: 'Absensi',
+    organization: 'Struktur Organisasi',
+    card: 'Kartu Ucapan',
+    ukt: 'Penilaian UKT',
+    pdf: 'Ekspor PDF'
+  }[section] || 'Dashboard';
+
+  document.querySelectorAll('.nav-button').forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.section === section);
+  });
 }
 
-function addStudent(event) {
+function handleLogin(event) {
   event.preventDefault();
-  const form = event.target;
-  const payload = {
-    id: Date.now(),
-    nama: form.nama.value.trim(),
-    nis: form.nis.value.trim(),
-    ttl: form.ttl.value,
-    alamat: form.alamat.value.trim(),
-    wali: form.wali.value.trim(),
-    tingkatan: form.tingkatan.value,
-    status: form.status.value
+  const id = document.getElementById('loginId').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const users = loadData(STORAGE_KEYS.users, defaultUsers);
+  const user = users.find((entry) => entry.id === id && entry.password === password);
+
+  if (!user) {
+    showToast('ID atau password tidak valid. Hubungi admin untuk mengajukan akses.');
+    return;
+  }
+
+  state.user = user;
+  renderAppIfLoggedIn();
+}
+
+function handleLogout() {
+  state.user = null;
+  state.activeSection = 'dashboard';
+  renderAppIfLoggedIn();
+  document.getElementById('loginForm').reset();
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  clearTimeout(showToast.timeoutId);
+  showToast.timeoutId = setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 2500);
+}
+
+function renderDashboard() {
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  const attendance = loadData(STORAGE_KEYS.attendance, defaultAttendance);
+  const assessments = loadData(STORAGE_KEYS.assessments, defaultAssessments);
+  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
+
+  const summaryCards = [
+    { label: 'Total Santri', value: students.length },
+    { label: 'Hadir Hari Ini', value: attendance.filter((item) => item.status === 'Hadir').length },
+    { label: 'Nilai Lulus', value: assessments.filter((item) => calculateAverage(item) >= 75).length },
+    { label: 'Tagline', value: profile.tagline.slice(0, 18) }
+  ];
+
+  const summaryGrid = document.getElementById('summaryGrid');
+  summaryGrid.innerHTML = summaryCards.map((item) => `
+    <div class="stat-card">
+      <span class="stat-label">${item.label}</span>
+      <div class="stat-value">${item.value}</div>
+    </div>
+  `).join('');
+
+  const quickActions = document.getElementById('quickActions');
+  const actions = [
+    'Pendaftaran',
+    'Absensi',
+    'UKT',
+    'PDF'
+  ];
+  quickActions.innerHTML = actions.map((action) => `
+    <button type="button" class="quick-action" data-go="${action.toLowerCase()}">${action}</button>
+  `).join('');
+
+  quickActions.querySelectorAll('[data-go]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const map = {
+        pendaftaran: 'students',
+        absensi: 'attendance',
+        ukt: 'ukt',
+        pdf: 'pdf'
+      };
+      switchSection(map[button.dataset.go]);
+    });
+  });
+
+  const profileSummaryBox = document.getElementById('profileSummaryBox');
+  profileSummaryBox.innerHTML = `
+    <div class="summary-point"><strong>Nama TPA:</strong> ${profile.name}</div>
+    <div class="summary-point"><strong>Alamat:</strong> ${profile.address}</div>
+    <div class="summary-point"><strong>Tanggal Berdiri:</strong> ${formatDate(profile.founded)}</div>
+    <div class="summary-point"><strong>Sejarah:</strong> ${profile.history}</div>
+  `;
+}
+
+function renderProfileForm() {
+  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
+  document.getElementById('profileName').value = profile.name;
+  document.getElementById('profileAddress').value = profile.address;
+  document.getElementById('profileFounded').value = profile.founded;
+  document.getElementById('profileTagline').value = profile.tagline;
+  document.getElementById('profileHistory').value = profile.history;
+  document.getElementById('profileLogoPreview').src = profile.logo || defaultProfile.logo;
+}
+
+function saveProfileData(event) {
+  event.preventDefault();
+  const profile = {
+    name: document.getElementById('profileName').value.trim(),
+    address: document.getElementById('profileAddress').value.trim(),
+    founded: document.getElementById('profileFounded').value,
+    tagline: document.getElementById('profileTagline').value.trim(),
+    history: document.getElementById('profileHistory').value.trim(),
+    logo: document.getElementById('profileLogoPreview').src || defaultProfile.logo
   };
 
-  if (!payload.nama || !payload.nis) {
-    alert('Nama dan NIS wajib diisi.');
-    return;
-  }
-
-  state.santri.unshift(payload);
-  saveState();
-  render();
-  form.reset();
-}
-
-function removeStudent(id) {
-  state.santri = state.santri.filter((item) => item.id !== id);
-  state.ukt = state.ukt.filter((item) => item.nama !== (state.santri.find((s) => s.id === id)?.nama || ''));
-  saveState();
-  render();
-}
-
-function saveProfile(event) {
-  event.preventDefault();
-  const form = event.target;
-  state.profile = {
-    ...state.profile,
-    nama: form.nama.value.trim(),
-    alamat: form.alamat.value.trim(),
-    tanggalBerdiri: form.tanggalBerdiri.value,
-    sejarah: form.sejarah.value.trim(),
-    tagline: form.tagline.value.trim(),
-    logo: state.profile.logo || ''
-  };
-  saveState();
-  render();
+  saveData(STORAGE_KEYS.profile, profile);
+  renderProfileOnLoginScreen();
+  renderDashboard();
+  showToast('Profil TPA berhasil diperbarui.');
 }
 
 function handleLogoUpload(event) {
-  const file = event.target.files?.[0];
+  const file = event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = (e) => {
-    state.profile.logo = e.target.result;
-    saveState();
-    render();
+    const preview = document.getElementById('profileLogoPreview');
+    preview.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-function addOrg(event) {
-  event.preventDefault();
-  const form = event.target;
-  const item = {
-    id: Date.now(),
-    nama: form.nama.value.trim(),
-    role: form.role.value.trim(),
-    foto: form.foto.value.trim() || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80'
-  };
+function renderAccountTable() {
+  const users = loadData(STORAGE_KEYS.users, defaultUsers);
+  const tbody = document.getElementById('accountTableBody');
 
-  if (!item.nama || !item.role) {
-    alert('Nama dan posisi wajib diisi.');
+  tbody.innerHTML = users.map((user) => `
+    <tr>
+      <td>${user.id}</td>
+      <td>${user.name}</td>
+      <td>${user.role}</td>
+      <td>
+        ${user.id === 'admin' || user.id === 'wali_santri' ? '<span class="badge pass">Default</span>' : `<button type="button" class="secondary-button" data-remove-user="${user.id}">Hapus</button>`}
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-remove-user]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const id = button.dataset.removeUser;
+      const usersCopy = loadData(STORAGE_KEYS.users, defaultUsers).filter((entry) => entry.id !== id);
+      saveData(STORAGE_KEYS.users, usersCopy);
+      renderAccountTable();
+      showToast('Akun berhasil dihapus.');
+    });
+  });
+}
+
+function addAccount(event) {
+  event.preventDefault();
+  const username = document.getElementById('accountUsername').value.trim();
+  const password = document.getElementById('accountPassword').value.trim();
+  const name = document.getElementById('accountName').value.trim();
+  const role = document.getElementById('accountRole').value;
+
+  if (!username || !password || !name) {
+    showToast('Semua field akun harus diisi.');
     return;
   }
 
-  state.organisasi.unshift(item);
-  saveState();
-  render();
-  form.reset();
-}
-
-function addUktScore(event) {
-  event.preventDefault();
-  const form = event.target;
-  const nama = form.nama.value;
-  const existingIndex = state.ukt.findIndex((item) => item.nama === nama);
-  const score = {
-    id: existingIndex >= 0 ? state.ukt[existingIndex].id : Date.now(),
-    nama,
-    level: form.level.value,
-    bacaan: Number(form.bacaan.value),
-    hafalan: Number(form.hafalan.value),
-    tauhid: Number(form.tauhid.value),
-    fiqih: Number(form.fiqih.value)
-  };
-
-  if (existingIndex >= 0) {
-    state.ukt[existingIndex] = score;
-  } else {
-    state.ukt.unshift(score);
+  const users = loadData(STORAGE_KEYS.users, defaultUsers);
+  if (users.some((entry) => entry.id === username)) {
+    showToast('Username sudah digunakan.');
+    return;
   }
 
-  saveState();
-  render();
-  form.reset();
+  users.push({ id: username, password, role, name });
+  saveData(STORAGE_KEYS.users, users);
+  document.getElementById('accountForm').reset();
+  renderAccountTable();
+  showToast('Akun baru berhasil ditambahkan.');
 }
 
-function calculateAverage(score) {
-  const values = [score.bacaan, score.hafalan, score.tauhid, score.fiqih];
-  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
-}
+function renderStudentTable() {
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  const tbody = document.getElementById('studentTableBody');
+  tbody.innerHTML = students.map((student) => `
+    <tr>
+      <td>${student.name}</td>
+      <td>${student.parent}</td>
+      <td>${student.dob}</td>
+      <td>${student.gender}</td>
+      <td>${student.phone}</td>
+      <td>${student.className}</td>
+      <td><button data-delete-student="${student.id}" class="secondary-button">Hapus</button></td>
+    </tr>
+  `).join('');
 
-function getStatusFromAverage(avg) {
-  return avg >= 75 ? 'Lulus' : 'Remedial';
-}
-
-function buildCardPreview() {
-  const toName = document.getElementById('cardTo')?.value || 'Sahabat TPA';
-  const title = document.getElementById('cardTitle')?.value || 'Selamat Hari Raya';
-  const message = document.getElementById('cardMessage')?.value || 'Semoga kebahagiaan dan keberkahan selalu menyertai Anda.';
-  const color1 = document.getElementById('startColor')?.value || '#176c4c';
-  const color2 = document.getElementById('endColor')?.value || '#f1c84c';
-
-  const preview = document.getElementById('cardPreview');
-  if (!preview) return;
-
-  preview.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-  preview.style.color = '#fff';
-  preview.innerHTML = `
-    <div class="card-top">
-      <div>
-        <div class="card-salutation">Kepada</div>
-        <div class="card-title">${escapeHtml(title)}</div>
-      </div>
-      <div class="card-brand">TPA Ar-Rahman</div>
-    </div>
-    <div class="card-message">${escapeHtml(message)}</div>
-    <div class="card-footer">
-      <div>
-        <div class="card-salutation">Untuk</div>
-        <div class="card-signature">${escapeHtml(toName)}</div>
-      </div>
-      <div class="card-brand">Semoga berkah</div>
-    </div>
-  `;
-}
-
-function escapeHtml(str = '') {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function downloadCardImage() {
-  const preview = document.getElementById('cardPreview');
-  if (!preview) return;
-
-  html2canvas(preview).then((canvas) => {
-    const link = document.createElement('a');
-    link.download = 'kartu-ucapan-tpa-ar-rahman.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  });
-}
-
-function exportPdf(type) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  if (type === 'santri') {
-    doc.setFontSize(16);
-    doc.text('Data Santri TPA Ar-Rahman', 14, 18);
-    const rows = state.santri.map((item) => [item.nama, item.nis, item.tingkatan, item.wali, item.status]);
-    doc.autoTable({
-      head: [['Nama', 'NIS', 'Tingkatan', 'Wali', 'Status']],
-      body: rows,
-      startY: 26,
-      theme: 'grid'
-    });
-  }
-
-  if (type === 'absensi') {
-    doc.setFontSize(16);
-    doc.text('Absensi Santri TPA Ar-Rahman', 14, 18);
-    const rows = state.attendance.map((item) => [item.nama, item.tanggal, item.status]);
-    doc.autoTable({
-      head: [['Nama', 'Tanggal', 'Status']],
-      body: rows,
-      startY: 26,
-      theme: 'grid'
-    });
-  }
-
-  if (type === 'ukt') {
-    doc.setFontSize(16);
-    doc.text('Leger Nilai UKT TPA Ar-Rahman', 14, 18);
-    const rows = state.ukt.map((item) => {
-      const avg = calculateAverage(item);
-      return [item.nama, item.level, item.bacaan, item.hafalan, item.tauhid, item.fiqih, avg, getStatusFromAverage(avg)];
-    });
-    doc.autoTable({
-      head: [['Nama', 'Level', 'Bacaan', 'Hafalan', 'Tauhid', 'Fiqih', 'Rata-rata', 'Status']],
-      body: rows,
-      startY: 26,
-      theme: 'grid'
-    });
-  }
-
-  if (type === 'rapor') {
-    doc.setFontSize(16);
-    doc.text('Rapor Santri TPA Ar-Rahman', 14, 18);
-    const rows = state.santri.map((santri) => {
-      const nilai = state.ukt.find((item) => item.nama === santri.nama);
-      const avg = nilai ? calculateAverage(nilai) : 0;
-      return [santri.nama, santri.tingkatan, avg >= 75 ? 'Naik Tingkat' : 'Perlu Remedial', avg];
-    });
-    doc.autoTable({
-      head: [['Nama', 'Tingkatan', 'Predikat', 'Nilai Akhir']],
-      body: rows,
-      startY: 26,
-      theme: 'grid'
-    });
-  }
-
-  const filename = {
-    santri: 'data-santri.pdf',
-    absensi: 'absensi-santri.pdf',
-    ukt: 'leger-nilai-ukt.pdf',
-    rapor: 'rapor-santri.pdf'
-  }[type];
-
-  doc.save(filename);
-}
-
-function renderLogin() {
-  return `
-    <div class="login-screen">
-      <div class="login-visual">
-        <div class="login-visual-inner">
-          <div class="logo-badge">A</div>
-          <h1>TPA Ar-Rahman</h1>
-          <p>Platform digital untuk mengelola santri, pembelajaran, dan pelaporan kegiatan TPA.</p>
-          <div class="feature-list">
-            <div class="feature-list-item"><span class="feature-dot"></span> Dashboard & navigasi cepat</div>
-            <div class="feature-list-item"><span class="feature-dot"></span> Pendaftaran santri terstruktur</div>
-            <div class="feature-list-item"><span class="feature-dot"></span> Penilaian UKT dan laporan PDF</div>
-          </div>
-        </div>
-      </div>
-      <div class="login-panel">
-        <div class="card login-card">
-          <h2>Masuk</h2>
-          <p class="subtle">Akses portal TPA sesuai role Anda.</p>
-          <form id="loginForm" class="form-grid">
-            <div class="field">
-              <label for="loginUser">ID Pengguna</label>
-              <input id="loginUser" name="username" type="text" placeholder="Masukkan ID" required />
-            </div>
-            <div class="field">
-              <label for="loginPass">Password</label>
-              <input id="loginPass" name="password" type="password" placeholder="Masukkan password" required />
-            </div>
-            <button class="primary-btn" type="submit">Login</button>
-            <div id="loginError" class="warning-text"></div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderAppShell() {
-  const role = state.auth.role;
-  const navItems = [
-    { key: 'dashboard', label: 'Dashboard' },
-    { key: 'santri', label: 'Pendaftaran Santri' },
-    { key: 'profile', label: 'Profil TPA' },
-    { key: 'struktur', label: 'Struktur Organisasi' },
-    { key: 'card', label: 'Kartu Ucapan' },
-    { key: 'ukt', label: 'Penilaian UKT' },
-    { key: 'export', label: 'Export & PDF' }
-  ];
-
-  if (role === 'admin') {
-    navItems.push({ key: 'account', label: 'Akun' });
-  }
-
-  return `
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <div class="sidebar-logo">A</div>
-          <div>
-            <div class="sidebar-title">TPA Ar-Rahman</div>
-            <div class="sidebar-subtitle">${state.profile.tagline}</div>
-          </div>
-        </div>
-        <nav class="nav-list">
-          ${navItems
-            .map(
-              (item) => `
-                <button data-page="${item.key}" class="nav-btn ${state.currentPage === item.key ? 'active' : ''}">
-                  ${item.label}
-                </button>
-              `
-            )
-            .join('')}
-        </nav>
-      </aside>
-      <main class="content">
-        <header class="topbar">
-          <div>
-            <h1>${pageTitle(state.currentPage)}</h1>
-          </div>
-          <div class="user-badge">
-            <span>${role === 'admin' ? 'Admin' : 'Wali Santri'}</span>
-            <button class="ghost-btn" id="logoutBtn" type="button">Keluar</button>
-          </div>
-        </header>
-        ${renderCurrentPage()}
-      </main>
-    </div>
-  `;
-}
-
-function pageTitle(page) {
-  const titles = {
-    dashboard: 'Dashboard',
-    santri: 'Pendaftaran & Data Santri',
-    profile: 'Profil TPA',
-    struktur: 'Struktur Organisasi',
-    card: 'Pembuat Kartu Ucapan',
-    ukt: 'Penilaian UKT',
-    export: 'Export & Cetak PDF',
-    account: 'Pengaturan Akun'
-  };
-  return titles[page] || 'Dashboard';
-}
-
-function renderCurrentPage() {
-  if (state.currentPage === 'santri') return renderSantriPage();
-  if (state.currentPage === 'profile') return renderProfilePage();
-  if (state.currentPage === 'struktur') return renderStrukturPage();
-  if (state.currentPage === 'card') return renderCardPage();
-  if (state.currentPage === 'ukt') return renderUktPage();
-  if (state.currentPage === 'export') return renderExportPage();
-  if (state.currentPage === 'account') return renderAccountPage();
-  return renderDashboardPage();
-}
-
-function renderDashboardPage() {
-  const totalSantri = state.santri.length;
-  const totalPengajar = state.organisasi.length;
-  const totalLulus = state.ukt.filter((item) => calculateAverage(item) >= 75).length;
-  const totalRemedial = state.ukt.filter((item) => calculateAverage(item) < 75).length;
-
-  return `
-    <div class="page">
-      <section class="stats-grid">
-        <div class="stat-box">
-          <p class="stat-title">Total Santri</p>
-          <p class="stat-value">${totalSantri}</p>
-        </div>
-        <div class="stat-box">
-          <p class="stat-title">Pengajar & Pengurus</p>
-          <p class="stat-value">${totalPengajar}</p>
-        </div>
-        <div class="stat-box">
-          <p class="stat-title">Lulus UKT</p>
-          <p class="stat-value">${totalLulus}</p>
-        </div>
-        <div class="stat-box">
-          <p class="stat-title">Perlu Remedial</p>
-          <p class="stat-value">${totalRemedial}</p>
-        </div>
-      </section>
-
-      <section class="card-grid">
-        <div class="panel">
-          <h3>Menu Cepat</h3>
-          <div class="card-grid">
-            <button class="quick-link" data-page="santri">Pendaftaran Santri</button>
-            <button class="quick-link" data-page="profile">Profil TPA</button>
-            <button class="quick-link" data-page="struktur">Struktur Organisasi</button>
-            <button class="quick-link" data-page="card">Kartu Ucapan</button>
-            <button class="quick-link" data-page="ukt">Penilaian UKT</button>
-            <button class="quick-link" data-page="export">Export PDF</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h3>Informasi TPA</h3>
-          <div class="field">
-            <label>Nama TPA</label>
-            <input value="${escapeHtml(state.profile.nama)}" readonly />
-          </div>
-          <div class="field mt-2">
-            <label>Alamat</label>
-            <input value="${escapeHtml(state.profile.alamat)}" readonly />
-          </div>
-          <div class="field mt-2">
-            <label>Tagline</label>
-            <input value="${escapeHtml(state.profile.tagline)}" readonly />
-          </div>
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function renderSantriPage() {
-  return `
-    <div class="page">
-      <div class="two-col">
-        <div class="panel">
-          <h3>Form Pendaftaran Santri Baru</h3>
-          <form id="santriForm" class="form-grid" onsubmit="addStudent(event)">
-            <div class="field">
-              <label>Nama Lengkap</label>
-              <input name="nama" type="text" placeholder="Contoh: Rafi Aulia" required />
-            </div>
-            <div class="field">
-              <label>NIS</label>
-              <input name="nis" type="text" placeholder="Contoh: 2024-012" required />
-            </div>
-            <div class="field">
-              <label>Tanggal Lahir</label>
-              <input name="ttl" type="date" required />
-            </div>
-            <div class="field">
-              <label>Alamat</label>
-              <input name="alamat" type="text" placeholder="Alamat domisili" required />
-            </div>
-            <div class="field">
-              <label>Nama Wali</label>
-              <input name="wali" type="text" placeholder="Nama orang tua/wali" required />
-            </div>
-            <div class="field">
-              <label>Tingkatan</label>
-              <select name="tingkatan">
-                <option>Dasar (Iqra')</option>
-                <option>Menengah (Baca Al-Qur'an)</option>
-                <option>Lanjutan (Tahfidz 30 Juz)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Status</label>
-              <select name="status">
-                <option>Aktif</option>
-                <option>Baru</option>
-                <option>Non-Aktif</option>
-              </select>
-            </div>
-            <button class="primary-btn" type="submit">Simpan Data Santri</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <h3>Ringkasan Data Santri</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Nama</th>
-                <th>Tingkatan</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.santri.slice(0, 5).map((item) => `
-                <tr>
-                  <td>${escapeHtml(item.nama)}</td>
-                  <td>${escapeHtml(item.tingkatan)}</td>
-                  <td><span class="status-tag success">${escapeHtml(item.status)}</span></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3>Daftar Santri</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nama</th>
-                <th>NIS</th>
-                <th>Tanggal Lahir</th>
-                <th>Alamat</th>
-                <th>Wali</th>
-                <th>Tingkatan</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.santri.length ? state.santri.map((item) => `
-                <tr>
-                  <td>${escapeHtml(item.nama)}</td>
-                  <td>${escapeHtml(item.nis)}</td>
-                  <td>${escapeHtml(item.ttl)}</td>
-                  <td>${escapeHtml(item.alamat)}</td>
-                  <td>${escapeHtml(item.wali)}</td>
-                  <td>${escapeHtml(item.tingkatan)}</td>
-                  <td><span class="status-tag success">${escapeHtml(item.status)}</span></td>
-                  <td>
-                    <div class="mini-actions">
-                      <button class="danger-btn" type="button" onclick="removeStudent(${item.id})">Hapus</button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('') : `<tr><td colspan="8"><div class="empty-box">Belum ada data santri.</div></td></tr>`}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderProfilePage() {
-  return `
-    <div class="page">
-      <div class="two-col">
-        <div class="panel">
-          <h3>Pengaturan Profil TPA</h3>
-          <form id="profileForm" class="form-grid" onsubmit="saveProfile(event)">
-            <div class="field">
-              <label>Nama TPA</label>
-              <input name="nama" value="${escapeHtml(state.profile.nama)}" required />
-            </div>
-            <div class="field">
-              <label>Alamat</label>
-              <textarea name="alamat" rows="3" required>${escapeHtml(state.profile.alamat)}</textarea>
-            </div>
-            <div class="field">
-              <label>Tanggal Berdiri</label>
-              <input name="tanggalBerdiri" type="date" value="${state.profile.tanggalBerdiri}" required />
-            </div>
-            <div class="field">
-              <label>Sejarah Singkat</label>
-              <textarea name="sejarah" rows="4" required>${escapeHtml(state.profile.sejarah)}</textarea>
-            </div>
-            <div class="field">
-              <label>Tagline</label>
-              <input name="tagline" value="${escapeHtml(state.profile.tagline)}" required />
-            </div>
-            <div class="field">
-              <label>Upload Logo</label>
-              <input type="file" accept="image/*" onchange="handleLogoUpload(event)" />
-            </div>
-            <button class="primary-btn" type="submit">Simpan Profil</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <h3>Preview Profil</h3>
-          <div class="logo-preview">
-            ${state.profile.logo ? `<img src="${state.profile.logo}" alt="Logo TPA" />` : 'TPA'}
-          </div>
-          <div class="mt-3">
-            <h4>${escapeHtml(state.profile.nama)}</h4>
-            <p>${escapeHtml(state.profile.alamat)}</p>
-            <p><strong>Berdiri:</strong> ${escapeHtml(state.profile.tanggalBerdiri)}</p>
-            <p><strong>Tagline:</strong> ${escapeHtml(state.profile.tagline)}</p>
-            <p>${escapeHtml(state.profile.sejarah)}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderStrukturPage() {
-  return `
-    <div class="page">
-      <div class="two-col">
-        <div class="panel">
-          <h3>Tambah Pengajar & Pengurus</h3>
-          <form id="orgForm" class="form-grid" onsubmit="addOrg(event)">
-            <div class="field">
-              <label>Nama</label>
-              <input name="nama" type="text" required />
-            </div>
-            <div class="field">
-              <label>Jabatan / Peran</label>
-              <input name="role" type="text" required />
-            </div>
-            <div class="field">
-              <label>URL Foto</label>
-              <input name="foto" type="url" placeholder="https://..." />
-            </div>
-            <button class="primary-btn" type="submit">Simpan Data</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <h3>Organisasi TPA</h3>
-          <div class="org-grid">
-            ${state.organisasi.length ? state.organisasi.map((item) => `
-              <div class="org-card">
-                <img src="${item.foto}" alt="${escapeHtml(item.nama)}" />
-                <div class="org-body">
-                  <h4>${escapeHtml(item.nama)}</h4>
-                  <p>${escapeHtml(item.role)}</p>
-                </div>
-              </div>
-            `).join('') : '<div class="empty-box">Belum ada data organisasi.</div>'}
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderCardPage() {
-  return `
-    <div class="page">
-      <div class="two-col">
-        <div class="panel">
-          <h3>Pengaturan Kartu Ucapan</h3>
-          <div class="form-grid">
-            <div class="field">
-              <label>Untuk</label>
-              <input id="cardTo" type="text" value="Sahabat TPA" />
-            </div>
-            <div class="field">
-              <label>Judul</label>
-              <input id="cardTitle" type="text" value="Selamat Hari Raya" />
-            </div>
-            <div class="field">
-              <label>Pesan</label>
-              <textarea id="cardMessage" rows="4">Semoga kebahagiaan, keberkahan, dan kebaikan selalu menyertai Anda.</textarea>
-            </div>
-            <div class="two-col">
-              <div class="field">
-                <label>Warna Awal</label>
-                <input id="startColor" type="color" value="#176c4c" />
-              </div>
-              <div class="field">
-                <label>Warna Akhir</label>
-                <input id="endColor" type="color" value="#f1c84c" />
-              </div>
-            </div>
-            <div class="mini-actions">
-              <button class="secondary-btn" type="button" onclick="buildCardPreview()">Pratinjau</button>
-              <button class="primary-btn" type="button" onclick="downloadCardImage()">Download PNG</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h3>Preview Kartu Ucapan</h3>
-          <div id="cardPreview" class="card-preview" style="background: linear-gradient(135deg, #176c4c, #f1c84c); color: white;">
-            <div class="card-top">
-              <div>
-                <div class="card-salutation">Kepada</div>
-                <div class="card-title">Selamat Hari Raya</div>
-              </div>
-              <div class="card-brand">TPA Ar-Rahman</div>
-            </div>
-            <div class="card-message">Semoga kebahagiaan, keberkahan, dan kebaikan selalu menyertai Anda.</div>
-            <div class="card-footer">
-              <div>
-                <div class="card-salutation">Untuk</div>
-                <div class="card-signature">Sahabat TPA</div>
-              </div>
-              <div class="card-brand">Semoga berkah</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderUktPage() {
-  const students = state.santri.map((item) => ({ name: item.nama }));
-
-  return `
-    <div class="page">
-      <div class="two-col">
-        <div class="panel">
-          <h3>Input Nilai UKT</h3>
-          <form id="uktForm" class="form-grid" onsubmit="addUktScore(event)">
-            <div class="field">
-              <label>Nama Santri</label>
-              <select name="nama" required>
-                ${students.map((student) => `<option value="${escapeHtml(student.name)}">${escapeHtml(student.name)}</option>`).join('')}
-              </select>
-            </div>
-            <div class="field">
-              <label>Tingkatan</label>
-              <select name="level">
-                <option>Dasar (Iqra')</option>
-                <option>Menengah (Baca Al-Qur'an)</option>
-                <option>Lanjutan (Tahfidz 30 Juz)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Bacaan</label>
-              <input name="bacaan" type="number" min="0" max="100" value="80" required />
-            </div>
-            <div class="field">
-              <label>Hafalan</label>
-              <input name="hafalan" type="number" min="0" max="100" value="80" required />
-            </div>
-            <div class="field">
-              <label>Tauhid</label>
-              <input name="tauhid" type="number" min="0" max="100" value="80" required />
-            </div>
-            <div class="field">
-              <label>Fiqih</label>
-              <input name="fiqih" type="number" min="0" max="100" value="80" required />
-            </div>
-            <button class="primary-btn" type="submit">Simpan Nilai</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <h3>Ketentuan Kelulusan</h3>
-          <p>Aspek penilaian mencakup Bacaan, Hafalan, Tauhid, dan Fiqih.</p>
-          <p>Nilai minimal kelulusan: <strong>75</strong></p>
-          <ul>
-            <li>Dasar (Iqra')</li>
-            <li>Menengah (Baca Al-Qur'an)</li>
-            <li>Lanjutan (Tahfidz 30 Juz)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3>Leger Nilai UKT</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nama</th>
-                <th>Level</th>
-                <th>Bacaan</th>
-                <th>Hafalan</th>
-                <th>Tauhid</th>
-                <th>Fiqih</th>
-                <th>Rata-rata</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.ukt.length ? state.ukt.map((item) => {
-                const avg = calculateAverage(item);
-                const status = getStatusFromAverage(avg);
-                return `
-                  <tr>
-                    <td>${escapeHtml(item.nama)}</td>
-                    <td>${escapeHtml(item.level)}</td>
-                    <td>${item.bacaan}</td>
-                    <td>${item.hafalan}</td>
-                    <td>${item.tauhid}</td>
-                    <td>${item.fiqih}</td>
-                    <td>${avg}</td>
-                    <td><span class="status-tag ${status === 'Lulus' ? 'success' : 'warning'}">${status}</span></td>
-                  </tr>
-                `;
-              }).join('') : `<tr><td colspan="8"><div class="empty-box">Belum ada data UKT.</div></td></tr>`}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderExportPage() {
-  return `
-    <div class="page">
-      <div class="panel">
-        <h3>Eksport & Cetak PDF</h3>
-        <div class="card-grid">
-          <button class="primary-btn" type="button" onclick="exportPdf('santri')">Download PDF Data Santri</button>
-          <button class="primary-btn" type="button" onclick="exportPdf('absensi')">Download PDF Absensi Santri</button>
-          <button class="primary-btn" type="button" onclick="exportPdf('ukt')">Download PDF Leger Nilai UKT</button>
-          <button class="primary-btn" type="button" onclick="exportPdf('rapor')">Download PDF Rapor Santri</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderAccountPage() {
-  if (state.auth.role !== 'admin') {
-    return `<div class="panel"><h3>Halaman terbatas</h3><p>Hanya admin yang dapat mengakses pengaturan akun.</p></div>`;
-  }
-
-  return `
-    <div class="page">
-      <div class="panel">
-        <h3>Pengaturan Akun</h3>
-        <form class="form-grid">
-          <div class="field">
-            <label>Nama Admin</label>
-            <input value="${escapeHtml(state.account.adminName)}" />
-          </div>
-          <div class="field">
-            <label>Email Admin</label>
-            <input value="${escapeHtml(state.account.adminEmail)}" />
-          </div>
-          <button class="primary-btn" type="button" onclick="alert('Pengaturan akun tersimpan')">Simpan</button>
-        </form>
-      </div>
-    </div>
-  `;
-}
-
-function attachEvents() {
-  const loginForm = document.getElementById('loginForm');
-  if (loginForm) {
-    loginForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const form = new FormData(loginForm);
-      try {
-        login(form.get('username'), form.get('password'));
-      } catch (error) {
-        document.getElementById('loginError').textContent = error.message;
-      }
-    });
-  }
-
-  const navButtons = document.querySelectorAll('[data-page]');
-  navButtons.forEach((button) => {
+  tbody.querySelectorAll('[data-delete-student]').forEach((button) => {
     button.addEventListener('click', () => {
-      const page = button.dataset.page;
-      if (page) setPage(page);
+      const id = button.dataset.deleteStudent;
+      const filtered = loadData(STORAGE_KEYS.students, defaultStudents).filter((student) => student.id !== id);
+      saveData(STORAGE_KEYS.students, filtered);
+      renderStudentTable();
+      renderAttendanceTable();
+      renderUktTable();
+      renderReportPreview();
+      showToast('Data santri berhasil dihapus.');
     });
   });
 
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) logoutBtn.addEventListener('click', logout);
+  const attendanceStudent = document.getElementById('attendanceStudent');
+  const uktStudent = document.getElementById('uktStudent');
+  const studentOptions = students.map((student) => `<option value="${student.id}">${student.name}</option>`).join('');
+  attendanceStudent.innerHTML = studentOptions;
+  uktStudent.innerHTML = studentOptions;
+}
 
-  const cardInputs = ['cardTo', 'cardTitle', 'cardMessage', 'startColor', 'endColor'];
-  cardInputs.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', buildCardPreview);
-    if (el) el.addEventListener('change', buildCardPreview);
+function addStudent(event) {
+  event.preventDefault();
+  const student = {
+    id: `S-${String(Date.now()).slice(-5)}`,
+    name: document.getElementById('studentName').value.trim(),
+    parent: document.getElementById('studentParent').value.trim(),
+    dob: document.getElementById('studentDob').value,
+    gender: document.getElementById('studentGender').value,
+    phone: document.getElementById('studentPhone').value.trim(),
+    className: document.getElementById('studentClass').value.trim()
+  };
+
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  students.push(student);
+  saveData(STORAGE_KEYS.students, students);
+  document.getElementById('studentForm').reset();
+  renderStudentTable();
+  renderDashboard();
+  renderReportPreview();
+  showToast('Data santri berhasil ditambah.');
+}
+
+function renderAttendanceTable() {
+  const attendance = loadData(STORAGE_KEYS.attendance, defaultAttendance);
+  const tbody = document.getElementById('attendanceTableBody');
+  tbody.innerHTML = attendance.map((item) => `
+    <tr>
+      <td>${item.studentName}</td>
+      <td>${item.date}</td>
+      <td>${item.status}</td>
+      <td><button data-delete-attendance="${item.id}" class="secondary-button">Hapus</button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-delete-attendance]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const id = button.dataset.deleteAttendance;
+      const filtered = loadData(STORAGE_KEYS.attendance, defaultAttendance).filter((entry) => entry.id !== id);
+      saveData(STORAGE_KEYS.attendance, filtered);
+      renderAttendanceTable();
+      renderDashboard();
+      showToast('Absensi berhasil dihapus.');
+    });
   });
+
+  const attendanceDate = document.getElementById('attendanceDate');
+  if (!attendanceDate.value) attendanceDate.value = new Date().toISOString().slice(0, 10);
 }
 
-function render() {
-  app.innerHTML = state.auth.loggedIn ? renderAppShell() : renderLogin();
-  attachEvents();
-  if (state.auth.loggedIn && state.currentPage === 'card') {
-    buildCardPreview();
+function addAttendance(event) {
+  event.preventDefault();
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  const studentId = document.getElementById('attendanceStudent').value;
+  const student = students.find((entry) => entry.id === studentId);
+  const date = document.getElementById('attendanceDate').value;
+  const status = document.getElementById('attendanceStatus').value;
+
+  if (!student || !date) {
+    showToast('Pilih santri dan tanggal absensi.');
+    return;
   }
+
+  const records = loadData(STORAGE_KEYS.attendance, defaultAttendance);
+  records.push({
+    id: `A-${String(Date.now()).slice(-5)}`,
+    studentId: student.id,
+    studentName: student.name,
+    date,
+    status
+  });
+
+  saveData(STORAGE_KEYS.attendance, records);
+  event.target.reset();
+  document.getElementById('attendanceDate').value = new Date().toISOString().slice(0, 10);
+  renderAttendanceTable();
+  renderDashboard();
+  showToast('Absensi berhasil disimpan.');
 }
 
-render();
+function renderOrganizationLists() {
+  const organization = loadData(STORAGE_KEYS.organization, defaultOrganization);
+  document.getElementById('teacherList').innerHTML = organization.teachers.map((person) => `
+    <div class="list-item">
+      <strong>${person.name}</strong>
+      <span>${person.role}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('boardList').innerHTML = organization.board.map((person) => `
+    <div class="list-item">
+      <strong>${person.name}</strong>
+      <span>${person.role}</span>
+    </div>
+  `).join('');
+}
+
+function renderCard() {
+  const canvas = document.getElementById('cardCanvas');
+  const ctx = canvas.getContext('2d');
+  const name = document.getElementById('cardName').value || 'Santri TPA';
+  const title = document.getElementById('cardTitle').value || 'Selamat Belajar';
+  const message = document.getElementById('cardMessage').value || 'Semoga ilmu bermanfaat.';
+  const color = document.getElementById('cardColor').value || '#0f766e';
+
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#f6f9f2');
+  gradient.addColorStop(0.6, '#fffaf2');
+  gradient.addColorStop(1, '#eefaf4');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, 140);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 28px Inter';
+  ctx.fillText('TPA Ar-Rahman', 48, 70);
+
+  ctx.fillStyle = '#1f2937';
+  ctx.font = '700 42px Inter';
+  ctx.fillText(title, 48, 220);
+
+  ctx.font = '500 28px Inter';
+  wrapText(ctx, `Kepada: ${name}`, 48, 270, 620, 36);
+
+  ctx.font = '500 22px Inter';
+  wrapText(ctx, message, 48, 330, 620, 32);
+
+  const logo = new Image();
+  logo.src = loadData(STORAGE_KEYS.profile, defaultProfile).logo || defaultProfile.logo;
+  logo.onload = () => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(canvas.width - 130, 110, 52, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(logo, canvas.width - 182, 58, 104, 104);
+    ctx.restore();
+  };
+}
+
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let currentY = y;
+
+  for (let i = 0; i < words.length; i += 1) {
+    const testLine = `${line}${words[i]} `;
+    const metrics = context.measureText(testLine);
+    if (metrics.width > maxWidth && i > 0) {
+      context.fillText(line, x, currentY);
+      line = `${words[i]} `;
+      currentY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  context.fillText(line, x, currentY);
+}
+
+function downloadCard() {
+  const canvas = document.getElementById('cardCanvas');
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = 'kartu-ucapan-tpa-ar-rahman.png';
+  link.click();
+}
+
+function renderUktTable() {
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  const assessments = loadData(STORAGE_KEYS.assessments, defaultAssessments);
+  const tbody = document.getElementById('uktTableBody');
+
+  const rows = assessments.map((entry) => {
+    const avg = calculateAverage(entry);
+    const status = avg >= 75 ? 'Lulus' : 'Remedial';
+    return `
+      <tr>
+        <td>${entry.studentName}</td>
+        <td>${entry.level}</td>
+        <td>${entry.bacaan}</td>
+        <td>${entry.hafalan}</td>
+        <td>${entry.tauhid}</td>
+        <td>${entry.fiqih}</td>
+        <td>${avg.toFixed(1)}</td>
+        <td><span class="badge ${status === 'Lulus' ? 'pass' : 'fail'}">${status}</span></td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="8">Belum ada data nilai.</td></tr>';
+
+  const studentSelect = document.getElementById('uktStudent');
+  const options = students.map((student) => `<option value="${student.id}">${student.name}</option>`).join('');
+  studentSelect.innerHTML = options;
+}
+
+function addAssessment(event) {
+  event.preventDefault();
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  const studentId = document.getElementById('uktStudent').value;
+  const student = students.find((entry) => entry.id === studentId);
+  const assessment = {
+    id: `N-${String(Date.now()).slice(-5)}`,
+    studentId: student.id,
+    studentName: student.name,
+    level: document.getElementById('uktLevel').value,
+    bacaan: Number(document.getElementById('uktBacaan').value),
+    hafalan: Number(document.getElementById('uktHafalan').value),
+    tauhid: Number(document.getElementById('uktTauhid').value),
+    fiqih: Number(document.getElementById('uktFiqih').value)
+  };
+
+  const data = loadData(STORAGE_KEYS.assessments, defaultAssessments);
+  const existingIndex = data.findIndex((entry) => entry.studentId === student.id);
+  if (existingIndex >= 0) data[existingIndex] = assessment;
+  else data.push(assessment);
+
+  saveData(STORAGE_KEYS.assessments, data);
+  renderUktTable();
+  renderReportPreview();
+  showToast('Nilai UKT berhasil disimpan.');
+}
+
+function calculateAverage(entry) {
+  const values = [entry.bacaan, entry.hafalan, entry.tauhid, entry.fiqih];
+  const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
+  return total / values.length;
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+}
+
+function renderReportPreview() {
+  const students = loadData(STORAGE_KEYS.students, defaultStudents);
+  const assessments = loadData(STORAGE_KEYS.assessments, defaultAssessments);
+  const profile = loadData(STORAGE_KEYS.profile, defaultProfile);
+  const preview = document.getElementById('reportPreview');
+
+  if (!students.length) {
+    preview.innerHTML = '<div class="report-card">Belum ada data santri.</div>';
+    return;
+  }
+
+  const report = students.map((student) => {
+    const grade = assessments.find((entry) => entry.studentId === student.id);
+    const average = grade ? calculateAverage(grade) : 0;
+    const status = average >= 75 ? 'Lulus' : 'Belum Lulus';
+
+    return `
+      <div class="report-card" style="margin-bottom: 14px;">
+        <h3>${profile.name}</h3>
+        <p><strong>Nama:</strong> ${student.name}</p>
+        <p><strong>Kelas:</strong> ${student.className}</p>
+        <p><strong>Nilai Rata-rata:</strong> ${average.toFixed(1)}</p>
+        <p><strong>Status:</strong> ${status}</p>
+      </div>
+    `;
+  }).join('');
+
+  preview.innerHTML = report;
+}
+
+async function exportToPdf(type) {
+  if (!window.jspdf || !window.html2canvas) {
+    showToast('Ekspor PDF gagal. Coba refresh kembali.');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+
+  if (type === 'studentsPdf') {
+    const element = document.getElementById('studentTableBody');
+    const canvas = await html2canvas(element.closest('table'));
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    pdf.save('data-santri.pdf');
+  }
+
+  if (type === 'attendancePdf') {
+    const element = document.getElementById('attendanceTableBody').closest('table');
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    pdf.save('absensi-santri.pdf');
+  }
+
+  if (type === 'uktPdf') {
+    const table = document.querySelector('#uktTableBody').closest('table');
+    const canvas = await html2canvas(table);
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    pdf.save('leger-nilai-ukt.pdf');
+  }
+
+  if (type === 'reportPdf') {
+    const element = document.getElementById('reportPreview');
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    pdf.save('rapor-santri.pdf');
+  }
+
+  showToast('PDF berhasil dibuat.');
+}
+
+bootstrap();

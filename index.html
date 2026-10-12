@@ -3,17 +3,422 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TPA Ar-Rahman</title>
+    <title>TPA Ar-Rahman | Sistem Manajemen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="loginScreen" class="auth-screen">
+      <div class="login-shell">
+        <div class="login-card">
+          <div class="brand-block text-center">
+            <img id="loginLogo" class="brand-logo" alt="Logo TPA Ar-Rahman" />
+            <div class="brand-name" id="loginBrandName">TPA Ar-Rahman</div>
+            <div class="brand-tagline" id="loginTagline">Tumbuhkan kecintaan pada Al-Qur'an sejak dini.</div>
+          </div>
+
+          <p class="login-note">Hubungi admin untuk meminta ID &amp; password.</p>
+
+          <form id="loginForm" class="stacked-form">
+            <label>
+              <span>ID Pengguna</span>
+              <input id="loginId" type="text" placeholder="Masukkan ID" required />
+            </label>
+            <label>
+              <span>Password</span>
+              <input id="loginPassword" type="password" placeholder="Masukkan password" required />
+            </label>
+            <button type="submit" class="primary-button full">Masuk Sistem</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="appScreen" class="app-shell hidden">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <img id="sidebarLogo" alt="Logo TPA Ar-Rahman" class="mini-logo" />
+          <div>
+            <div class="sidebar-title" id="sidebarTitle">TPA Ar-Rahman</div>
+            <small id="sidebarTagline">Tagline</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <button class="nav-button is-active" data-section="dashboard">Dashboard</button>
+          <button class="nav-button" data-section="profile">Profil TPA</button>
+          <button class="nav-button" data-section="accounts">Pengaturan Akun</button>
+          <button class="nav-button" data-section="students">Pendaftaran Santri</button>
+          <button class="nav-button" data-section="attendance">Absensi</button>
+          <button class="nav-button" data-section="organization">Struktur Organisasi</button>
+          <button class="nav-button" data-section="card">Kartu Ucapan</button>
+          <button class="nav-button" data-section="ukt">Penilaian UKT</button>
+          <button class="nav-button" data-section="pdf">Ekspor PDF</button>
+        </nav>
+
+        <button id="logoutBtn" class="secondary-button full">Keluar</button>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Sistem Manajemen</p>
+            <h1 id="currentTitle">Dashboard</h1>
+          </div>
+          <div class="user-badge" id="userBadge">Hai, Admin</div>
+        </header>
+
+        <section id="dashboardSection" class="page-section">
+          <div class="summary-grid" id="summaryGrid"></div>
+          <div class="cards-grid dashboard-grid">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Quick Access</h3>
+              </div>
+              <div class="quick-actions" id="quickActions"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Ringkasan Profil TPA</h3>
+              </div>
+              <div id="profileSummaryBox" class="summary-box"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="profileSection" class="page-section hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Profil TPA</h3>
+            </div>
+            <form id="profileForm" class="form-grid">
+              <label>
+                <span>Nama TPA</span>
+                <input id="profileName" name="profileName" type="text" required />
+              </label>
+              <label>
+                <span>Alamat</span>
+                <input id="profileAddress" name="profileAddress" type="text" required />
+              </label>
+              <label>
+                <span>Tanggal Berdiri</span>
+                <input id="profileFounded" name="profileFounded" type="date" required />
+              </label>
+              <label>
+                <span>Tagline</span>
+                <input id="profileTagline" name="profileTagline" type="text" required />
+              </label>
+              <label class="full-span">
+                <span>Sejarah</span>
+                <textarea id="profileHistory" name="profileHistory" rows="5" required></textarea>
+              </label>
+              <label class="full-span">
+                <span>Logo TPA</span>
+                <input id="profileLogoInput" type="file" accept="image/*" />
+              </label>
+              <div class="full-span logo-preview-wrap">
+                <img id="profileLogoPreview" class="logo-preview" alt="Preview logo" />
+              </div>
+              <div class="full-span">
+                <button type="submit" class="primary-button">Simpan Profil</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="accountsSection" class="page-section hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Pengaturan Akun</h3>
+            </div>
+            <form id="accountForm" class="form-grid compact-form">
+              <label>
+                <span>Nama Pengguna</span>
+                <input id="accountUsername" type="text" placeholder="contoh: wali_baru" required />
+              </label>
+              <label>
+                <span>Nama Lengkap</span>
+                <input id="accountName" type="text" placeholder="Nama lengkap" required />
+              </label>
+              <label>
+                <span>Password</span>
+                <input id="accountPassword" type="text" placeholder="Password" required />
+              </label>
+              <label>
+                <span>Role</span>
+                <select id="accountRole">
+                  <option value="Wali Santri">Wali Santri</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </label>
+              <div class="full-span">
+                <button type="submit" class="primary-button">Tambah Akun</button>
+              </div>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Nama</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="accountTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="studentsSection" class="page-section hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Pendaftaran Santri</h3>
+            </div>
+            <form id="studentForm" class="form-grid">
+              <label>
+                <span>Nama Santri</span>
+                <input id="studentName" type="text" required />
+              </label>
+              <label>
+                <span>Nama Wali</span>
+                <input id="studentParent" type="text" required />
+              </label>
+              <label>
+                <span>Tanggal Lahir</span>
+                <input id="studentDob" type="date" required />
+              </label>
+              <label>
+                <span>Jenis Kelamin</span>
+                <select id="studentGender">
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </label>
+              <label>
+                <span>Nomor HP Wali</span>
+                <input id="studentPhone" type="text" required />
+              </label>
+              <label>
+                <span>Kelas</span>
+                <input id="studentClass" type="text" placeholder="Contoh: Dasar A" required />
+              </label>
+              <div class="full-span">
+                <button type="submit" class="primary-button">Tambah Santri</button>
+              </div>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama</th>
+                    <th>Wali</th>
+                    <th>TTL</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Telepon</th>
+                    <th>Kelas</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="studentTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="attendanceSection" class="page-section hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Absensi Santri</h3>
+            </div>
+            <form id="attendanceForm" class="form-grid compact-form">
+              <label>
+                <span>Santri</span>
+                <select id="attendanceStudent"></select>
+              </label>
+              <label>
+                <span>Tanggal</span>
+                <input id="attendanceDate" type="date" required />
+              </label>
+              <label>
+                <span>Status</span>
+                <select id="attendanceStatus">
+                  <option value="Hadir">Hadir</option>
+                  <option value="Izin">Izin</option>
+                  <option value="Sakit">Sakit</option>
+                  <option value="Alpha">Alpha</option>
+                </select>
+              </label>
+              <div class="full-span">
+                <button type="submit" class="primary-button">Simpan Absensi</button>
+              </div>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="attendanceTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="organizationSection" class="page-section hidden">
+          <div class="cards-grid two-columns">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Pengajar</h3>
+              </div>
+              <div id="teacherList" class="list-stack"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Pengurus</h3>
+              </div>
+              <div id="boardList" class="list-stack"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="cardSection" class="page-section hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Generator Kartu Ucapan</h3>
+            </div>
+            <div class="form-grid card-generator-layout">
+              <div class="stacked-form">
+                <label>
+                  <span>Nama Penerima</span>
+                  <input id="cardName" type="text" value="Santri TPA" />
+                </label>
+                <label>
+                  <span>Judul</span>
+                  <input id="cardTitle" type="text" value="Selamat Belajar" />
+                </label>
+                <label>
+                  <span>Pesan</span>
+                  <textarea id="cardMessage" rows="4">Semoga ilmu yang dipelajari bermanfaat dan membawa keberkahan.</textarea>
+                </label>
+                <label>
+                  <span>Warna</span>
+                  <select id="cardColor">
+                    <option value="#0f766e">Hijau</option>
+                    <option value="#7c3aed">Ungu</option>
+                    <option value="#d97706">Emas</option>
+                    <option value="#1d4ed8">Biru</option>
+                  </select>
+                </label>
+                <button id="generateCardBtn" type="button" class="primary-button">Buat Kartu</button>
+                <button id="downloadCardBtn" type="button" class="secondary-button">Download PNG</button>
+              </div>
+              <div class="card-preview-box">
+                <canvas id="cardCanvas" width="700" height="420"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="uktSection" class="page-section hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Penilaian UKT</h3>
+            </div>
+            <form id="uktForm" class="form-grid compact-form">
+              <label>
+                <span>Santri</span>
+                <select id="uktStudent"></select>
+              </label>
+              <label>
+                <span>Tingkatan</span>
+                <select id="uktLevel">
+                  <option value="Dasar (Iqra')">Dasar (Iqra')</option>
+                  <option value="Menengah (Baca Al-Qur'an)">Menengah (Baca Al-Qur'an)</option>
+                  <option value="Lanjutan (Tahfidz 30 Juz)">Lanjutan (Tahfidz 30 Juz)</option>
+                </select>
+              </label>
+              <label>
+                <span>Bacaan</span>
+                <input id="uktBacaan" type="number" min="0" max="100" value="80" required />
+              </label>
+              <label>
+                <span>Hafalan</span>
+                <input id="uktHafalan" type="number" min="0" max="100" value="80" required />
+              </label>
+              <label>
+                <span>Tauhid</span>
+                <input id="uktTauhid" type="number" min="0" max="100" value="80" required />
+              </label>
+              <label>
+                <span>Fiqih</span>
+                <input id="uktFiqih" type="number" min="0" max="100" value="80" required />
+              </label>
+              <div class="full-span">
+                <button type="submit" class="primary-button">Simpan Nilai</button>
+              </div>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Santri</th>
+                    <th>Tingkatan</th>
+                    <th>Bacaan</th>
+                    <th>Hafalan</th>
+                    <th>Tauhid</th>
+                    <th>Fiqih</th>
+                    <th>Rata-rata</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="uktTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="pdfSection" class="page-section hidden">
+          <div class="cards-grid pdf-grid">
+            <div class="panel pdf-item">
+              <h3>Download PDF Data Santri</h3>
+              <button class="primary-button" data-export="studentsPdf">Download PDF</button>
+            </div>
+            <div class="panel pdf-item">
+              <h3>Download PDF Absensi Santri</h3>
+              <button class="primary-button" data-export="attendancePdf">Download PDF</button>
+            </div>
+            <div class="panel pdf-item">
+              <h3>Download PDF Leger Nilai UKT</h3>
+              <button class="primary-button" data-export="uktPdf">Download PDF</button>
+            </div>
+            <div class="panel pdf-item">
+              <h3>Download PDF Rapor Santri</h3>
+              <button class="primary-button" data-export="reportPdf">Download PDF</button>
+            </div>
+          </div>
+
+          <div class="panel export-preview-panel">
+            <div class="panel-header">
+              <h3>Preview Rapor</h3>
+            </div>
+            <div id="reportPreview" class="report-preview"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
     <script src="app.js"></script>
   </body>
 </html>

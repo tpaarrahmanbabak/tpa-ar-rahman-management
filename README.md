@@ -1,46 +1,377 @@
-# TPA Ar-Rahman Management App
+# TPA Ar-Rahman Management System
 
-Aplikasi web manajemen TPA Ar-Rahman yang mencakup:
-- Login multi-role
-- Dashboard dan navigasi cepat
-- Pendaftaran santri
-- Profil TPA
+Aplikasi web simulasi untuk sistem manajemen TPA Ar-Rahman dengan fitur:
+- Multi-role login (Admin dan Wali Santri)
+- Pengaturan akun khusus admin
+- Profil TPA dinamis
+- Data santri dan absensi
 - Struktur organisasi
 - Generator kartu ucapan
-- Penilaian UKT
+- Penilaian UKT dan rapor
 - Export PDF
-- Pengaturan akun khusus admin
+- Desain islami modern
 
 ## Cara menjalankan
 
-1. Buka file `index.html` di browser.
-2. Gunakan login berikut:
-   - Admin: ID `admin` / Password `Kevinganteng313`
-   - Wali Santri: ID `wali santri` / Password `walisantri123`
+1. Buka folder project.
+2. Jalankan server lokal:
+
+```bash
+python -m http.server 8000
+```
+
+3. Buka browser ke:
+
+```text
+http://localhost:8000
+```
+
+## Login demo
+
+ID dan password tidak ditampilkan di halaman login, tetapi aplikasi menggunakan akun default berikut di sisi backend simulasi:
+- Admin: `admin` / `Kevinganteng313`
+- Wali Santri: `wali_santri` / `walisantri123`
+
+Catatan: fitur ini disimpan pada `localStorage` browser untuk simulasi cepat.
+
+## Struktur file
+
+- `index.html` : layout utama aplikasi
+- `styles.css` : desain islami modern
+- `app.js` : logika aplikasi, data simulasi, dan fitur utama
 
 ## Catatan
 
-- Kredensial admin tidak ditampilkan di halaman login.
-- Data disimpan di `localStorage` browser.
-- Fitur export PDF dibangun menggunakan library JS via CDN.
+Aplikasi ini dibuat sebagai simulasi web yang siap dibuka langsung di browser dan dapat dikembangkan lebih lanjut menjadi versi penuh berbasis React, Laravel, atau Node.js.
 
-## Struktur aplikasi
 
-- `index.html`
-- `styles.css`
-- `app.js`
 
-## Fitur utama
 
-- Dashboard & navigasi cepat ke seluruh halaman
-- Pendaftaran dan manajemen santri
-- Profil TPA dengan nama, alamat, tanggal berdiri, sejarah, tagline, dan logo
-- Struktur organisasi untuk pengajar dan pengurus
-- Kartu ucapan otomatis dengan pratinjau
-- Penilaian UKT dengan tingkat Dasar, Menengah, dan Lanjutan
-- Download PDF untuk data santri, absensi, leger nilai, dan rapor
-- Pengaturan akun hanya untuk admin
 
-## Catatan teknis
 
-Aplikasi ini dibuat sebagai aplikasi web frontend statis agar mudah dijalankan tanpa instalasi server tambahan.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
